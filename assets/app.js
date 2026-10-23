@@ -1,11 +1,9 @@
 const C = window.LOCKIN_GIVEAWAY_CONFIG || {};
 const isSet = Boolean(
   /^https:\/\/[\w-]+\.supabase\.co\/?$/.test(C.SUPABASE_URL || '') &&
-  C.SUPABASE_PUBLISHABLE_KEY &&
-  !C.SUPABASE_PUBLISHABLE_KEY.includes('REPLACE_ME') &&
-  C.TURNSTILE_SITE_KEY &&
-  C.TURNSTILE_SITE_KEY !== 'TURNSTILE_PUBLIC_SITE_KEY'
+  C.SUPABASE_PUBLISHABLE_KEY && !C.SUPABASE_PUBLISHABLE_KEY.includes('REPLACE_ME')
 );
+const hasCaptcha = Boolean(C.TURNSTILE_SITE_KEY && C.TURNSTILE_SITE_KEY !== 'TURNSTILE_PUBLIC_SITE_KEY');
 const $ = id => document.getElementById(id);
 const adminMode = new URLSearchParams(location.search).has('admin');
 const baseApi = `${(C.SUPABASE_URL || '').replace(/\/$/, '')}/functions/v1/contest-api`;
@@ -104,7 +102,7 @@ function showReceipt(record) {
   $('receiptDetail').textContent = `${record.name} · الكود ${record.code}`;
 }
 function renderCaptcha() {
-  if (adminMode || !isSet || widgetId !== null) return;
+  if (adminMode || !isSet || !hasCaptcha || widgetId !== null) return;
   if (!window.turnstile) return;
   widgetId = window.turnstile.render('#turnstileWidget', {
     sitekey: C.TURNSTILE_SITE_KEY,
@@ -122,7 +120,7 @@ async function handleRegistration(event) {
     notice('signupFeedback', 'الاسم لازم يكون من 2 إلى 50 حرف، والكود 5 أرقام.');
     return;
   }
-  if (!turnstileToken) {
+  if (hasCaptcha && !turnstileToken) {
     notice('signupFeedback', 'أكمل اختبار الأمان قبل المشاركة.');
     return;
   }
@@ -323,6 +321,7 @@ if (adminMode) {
     const record = JSON.parse(localStorage.getItem(REC_KEY) || 'null');
     if (record && record.ticket && record.name && record.code) showReceipt(record);
   } catch { /* private browsing */ }
+  if (!hasCaptcha) $('captchaBox').classList.add('hidden');
   const captchaTimer = setInterval(() => {
     if (window.turnstile) {
       clearInterval(captchaTimer);
