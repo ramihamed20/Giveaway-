@@ -1,0 +1,38 @@
+name: Install Lock-in Giveaway files
+on:
+  push:
+    branches: [main]
+    paths: [deployment.tar.gz]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  unpack-site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Unpack website and backend source
+        run: |
+          set -euo pipefail
+          tar -tzf deployment.tar.gz | while read -r path; do
+            case "$path" in /*|*".."*) echo "Unsafe archive path: $path"; exit 1 ;; esac
+          done
+          tar -xzf deployment.tar.gz
+          test -f index.html
+          test -f assets/app.js
+          test -f assets/styles.css
+          test -f assets/lockin-logo.png
+          test -f supabase/schema.sql
+          test -f supabase/functions/contest-api/index.ts
+      - name: Commit source files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Install full Lock-in giveaway app, logo and Supabase files"
+            git push
+          fi
