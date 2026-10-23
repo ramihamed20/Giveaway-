@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#faf9f6">
+  <meta name="description" content="مسابقة Lock-in: أدخل اسمك وكودك المكوّن من خمسة أرقام وشارك في السحب على اشتراكات مجانية وخصومات.">
+  <title>مسابقة Lock-in | السحب على الجوائز</title>
+  <link rel="icon" type="image/png" href="./assets/lockin-logo.png">
+  <link rel="apple-touch-icon" href="./assets/lockin-logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/styles.css">
+  <script src="./config.js"></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+  <script src="./assets/app.js" type="module"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="./" aria-label="Lock-in - الصفحة الرئيسية">
+        <img src="./assets/lockin-logo.png" alt="شعار Lock-in" width="47" height="47">
+        <span class="brand-name">Lock-in<small>مسابقة الجوائز</small></span>
+      </a>
+      <nav class="header-nav" aria-label="روابط الموقع">
+        <a href="#winners">الفائزون</a>
+        <a class="admin-link" id="adminNav" href="?admin=1">الإدارة</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="publicPage">
+    <section class="intro container">
+      <div class="eyebrow"><span class="gold-dot"></span> مسابقة Lock-in</div>
+      <h1>شارك في السحب <span>واربح!</span></h1>
+      <p>اكتب اسمك وكودك المكوّن من <strong>5 أرقام</strong> وادخل السحب على اشتراكات مجانية وخصومات Lock-in.</p>
+      <div class="intro-pills"><span>6 فائزين</span><span>سحب عشوائي</span><span><strong id="entriesCount">—</strong> مشارك</span></div>
+    </section>
+
+    <section class="container participate-grid" id="join" aria-label="الاشتراك في المسابقة">
+      <div class="signup-card" id="signupCard">
+        <div class="section-heading">
+          <span class="step-label">01 / التسجيل</span>
+          <h2>ادخل السحب</h2>
+          <p>اسمك وكود من خمسة أرقام، وبس.</p>
+        </div>
+        <div id="configWarning" class="notice notice-warning hidden" role="alert">التسجيل غير مفعّل بعد. يلزم ربط الموقع بخدمة Supabase وإعداد التحقق.</div>
+        <div id="closedWarning" class="notice notice-warning hidden" role="status">تم إغلاق التسجيل. تابع إعلان الفائزين بالأسفل.</div>
+        <form id="signupForm">
+          <label for="entryName">الاسم</label>
+          <input id="entryName" name="entryName" type="text" minlength="2" maxlength="50" autocomplete="name" placeholder="اسمك هنا" required>
+          <label for="entryCode">الكود الخاص بك <span class="label-hint">(5 أرقام)</span></label>
+          <input id="entryCode" class="code-input" name="entryCode" type="text" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" autocomplete="off" dir="ltr" placeholder="00000" required>
+          <p class="input-hint">اختر كودًا غير مستخدم. مسموح أن يبدأ بصفر.</p>
+          <div class="captcha-box" id="captchaBox"><div id="turnstileWidget"></div></div>
+          <label class="check-label"><input id="consent" type="checkbox" required><span>أوافق على نشر اسمي وكودي مع إخفاء رقم واحد في حال فوزي.</span></label>
+          <button id="signupButton" type="submit" class="button button-primary submit-button">تأكيد المشاركة <span aria-hidden="true">←</span></button>
+          <div id="signupFeedback" class="feedback" aria-live="polite"></div>
+        </form>
+        <div id="receiptPanel" class="receipt-panel hidden" aria-live="polite">
+          <span class="success-icon" aria-hidden="true">✓</span>
+          <h3>تم تسجيل مشاركتك</h3>
+          <p>هذه التذكرة إثبات مشاركتك. احتفظ بها ولا ترسلها لأحد.</p>
+          <div class="receipt-key" id="receiptKey" dir="ltr"></div>
+          <div class="receipt-detail" id="receiptDetail"></div>
+          <button type="button" class="button button-primary submit-button" id="copyReceipt">نسخ تذكرة الإثبات</button>
+          <button type="button" class="tiny-link" id="resetReceipt">إغلاق</button>
+        </div>
+      </div>
+      <aside class="prizes-card" id="prizes" aria-label="جوائز المسابقة">
+        <div class="section-heading">
+          <span class="step-label">02 / الجوائز</span>
+          <h2>جوائز المسابقة</h2>
+          <p>6 فرص للفوز. كل شخص يُختار له فوز واحد فقط.</p>
+        </div>
+        <div class="prize-list">
+          <div class="prize-row"><div class="prize-icon">★</div><div class="prize-details"><strong>اشتراك مجاني</strong><span>Lock-in مجانًا</span></div><div class="prize-count">فائزان</div></div>
+          <div class="prize-row"><div class="prize-icon">75%</div><div class="prize-details"><strong>خصم 75%</strong><span>على الاشتراك</span></div><div class="prize-count">فائز واحد</div></div>
+          <div class="prize-row"><div class="prize-icon">50%</div><div class="prize-details"><strong>خصم 50%</strong><span>على الاشتراك</span></div><div class="prize-count">فائزان</div></div>
+          <div class="prize-row"><div class="prize-icon">25%</div><div class="prize-details"><strong>خصم 25%</strong><span>على الاشتراك</span></div><div class="prize-count">فائز واحد</div></div>
+        </div>
+        <div class="steps-note"><strong>بعد المشاركة:</strong> احفظ تذكرة الإثبات، وتابع إعلان الفائزين. إذا ظهر اسمك، تواصل معنا بكودك وتذكرتك بشكل خاص.</div>
+      </aside>
+    </section>
+
+    <section class="winners-section container" id="winners">
+      <div class="winners-head"><div><span class="step-label">03 / النتائج</span><h2>الفائزون</h2></div><p>نعلن هنا أسماء الفائزين مع إخفاء رقم واحد من كل كود.</p></div>
+      <div id="winnersGrid" class="winners-grid">
+        <div class="empty-winners"><div class="empty-star">☆</div><h3>لم يبدأ السحب بعد</h3><p>سيتم عرض الفائزين بعد الإعلان عن النتائج.</p></div>
+      </div>
+    </section>
+  </main>
+
+  <main id="adminPage" class="container admin-page hidden">
+    <div class="admin-heading"><span class="step-label">Lock-in / Admin</span><h1>لوحة إدارة المسابقة</h1><p>أغلق التسجيل، اسحب الفائزين، وانشر بطاقات النتائج.</p></div>
+    <div id="loginPanel" class="admin-login"><h2>دخول المسؤول</h2><p>استخدم حساب المسؤول المسجّل في Supabase Auth.</p><form id="loginForm"><label for="adminEmail">البريد الإلكتروني</label><input id="adminEmail" type="email" required autocomplete="username" placeholder="admin@example.com"><label for="adminPassword">كلمة المرور</label><input id="adminPassword" type="password" required autocomplete="current-password" placeholder="••••••••"><button class="button button-primary submit-button" type="submit">دخول</button></form><div id="loginFeedback" class="feedback" aria-live="polite"></div></div>
+    <div id="adminDashboard" class="hidden">
+      <div class="admin-toolbar"><div><span class="muted">المشاركون</span><strong id="adminEntriesCount">0</strong></div><div><span class="muted">الفائزون</span><strong id="adminDrawsCount">0 / 6</strong></div><button id="toggleSignupButton" class="button button-secondary" type="button">—</button><button id="refreshAdminButton" class="button button-secondary" type="button">تحديث</button><button id="signoutButton" class="button button-outline" type="button">خروج</button></div>
+      <div id="adminFeedback" class="feedback" aria-live="polite"></div>
+      <div class="admin-notice">اسحب الفائزين بعد إغلاق التسجيل فقط. كل مشاركة تفوز مرة واحدة، ولا يمكن إعادة السحب على نفس الجائزة.</div>
+      <h2 class="admin-subhead">الجوائز والسحب</h2><div id="adminPrizes" class="admin-prizes"></div>
+      <h2 class="admin-subhead">الفائزون وبطاقات التصوير</h2><div id="adminDraws" class="admin-draws"></div>
+    </div>
+  </main>
+
+  <footer class="site-footer"><div class="container footer-inner"><span>© 2026 Lock-in</span><span>مسابقة مستقلة عن حسابات الطلاب</span><a href="?admin=1">إدارة المسابقة</a></div></footer>
+  <div id="shotOverlay" class="shot-overlay hidden" role="dialog" aria-modal="true" aria-label="بطاقة الفائز للتصوير"><div class="shot-bar"><span>بطاقة الفائز للتصوير</span><button type="button" class="button button-outline" id="closeShot">إغلاق ✕</button></div><div class="shot-frame" id="shotFrame"></div></div>
+</body>
+</html>
