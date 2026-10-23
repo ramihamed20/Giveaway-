@@ -54,7 +54,7 @@ npx supabase secrets set TURNSTILE_HOSTNAME="ramihamed20.github.io"
 npx supabase functions deploy contest-api --no-verify-jwt
 ```
 
-بدّل `YOUR-USER` باسم مستخدم GitHub الذي ستنشر عليه. `ALLOWED_ORIGIN` هو **origin فقط** دون مسار المستودع أو `/` نهائية، بينما `TURNSTILE_HOSTNAME` اسم المضيف **بلا https**.
+بدّل `ramihamed20` باسم مستخدم GitHub الذي ستنشر عليه. `ALLOWED_ORIGIN` هو **origin فقط** دون مسار المستودع أو `/` نهائية، بينما `TURNSTILE_HOSTNAME` اسم المضيف **بلا https**.
 
 `SUPABASE_URL` و`SUPABASE_SERVICE_ROLE_KEY` يُتاحان تلقائيًا في بيئة Supabase Edge Function المستضافة. **لا تضع مفتاح `service_role` في ملفات الواجهة أو على GitHub أبدًا.**
 
