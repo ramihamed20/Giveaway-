@@ -1,0 +1,2 @@
+[functions.contest-api]
+verify_jwt = false
