@@ -2,7 +2,7 @@ name: Install Lock-in Giveaway files
 on:
   push:
     branches: [main]
-    paths: [deployment.tar.gz]
+    paths: [deployment.ready]
   workflow_dispatch:
 permissions:
   contents: write
@@ -17,6 +17,7 @@ jobs:
       - name: Unpack website and backend source
         run: |
           set -euo pipefail
+          cat deploy-parts/part*.b64 | base64 --decode > deployment.tar.gz
           tar -tzf deployment.tar.gz | while read -r path; do
             case "$path" in /*|*".."*) echo "Unsafe archive path: $path"; exit 1 ;; esac
           done
@@ -27,7 +28,8 @@ jobs:
           test -f assets/lockin-logo.png
           test -f supabase/schema.sql
           test -f supabase/functions/contest-api/index.ts
-      - name: Commit source files
+          rm -rf deploy-parts deployment.ready deployment.tar.gz
+      - name: Commit website files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
