@@ -6,8 +6,8 @@ import { createClient } from 'npm:@supabase/supabase-js@2.95.0';
 const API_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const TURNSTILE_SECRET = Deno.env.get('TURNSTILE_SECRET') ?? '';
-const IP_HASH_SECRET = Deno.env.get('IP_HASH_SECRET') ?? '';
-const ALLOWED_ORIGIN = (Deno.env.get('ALLOWED_ORIGIN') ?? '').replace(/\/$/, '');
+const IP_HASH_SECRET = Deno.env.get('IP_HASH_SECRET') ?? SERVICE_KEY;
+const ALLOWED_ORIGIN = (Deno.env.get('ALLOWED_ORIGIN') ?? 'https://ramihamed20.github.io').replace(/\/$/, '');
 const supabase = createClient(API_URL, SERVICE_KEY, {
   auth: { autoRefreshToken: false, persistSession: false }
 });
@@ -116,19 +116,18 @@ async function register(body: any, req: Request, origin: string) {
   const captcha = body?.captcha;
   if (!isValidName(name) || typeof code !== 'string' || !/^\d{5}$/.test(code))
     return errorMessage('الاسم أو الكود غير صالح. الكود لازم يكون 5 أرقام بالضبط.', 400, origin);
-  if (!captcha || typeof captcha !== 'string')
-    return errorMessage('أكمل اختبار التحقق قبل التسجيل.', 400, origin);
-
-  // The edge infrastructure should overwrite x-forwarded-for; CAPTCHA is the primary bot defense.
-  const ip = (req.headers.get('x-forwarded-for') ?? '').split(',')[0]?.trim() ?? '';
-  const validCaptcha = await checkCaptcha(captcha, ip);
-  if (!validCaptcha) return errorMessage('اختبار التحقق فشل. حاول مرة ثانية.', 400, origin);
+  const ip = (req.headers.get('x-forwarded-for') ?? req.headers.get('cf-connecting-ip') ?? '').split(',')[0]?.trim() ?? '';
+  if (TURNSTILE_SECRET) {
+    if (!captcha || typeof captcha !== 'string')
+      return errorMessage('أكمل اختبار التحقق قبل التسجيل.', 400, origin);
+    const validCaptcha = await checkCaptcha(captcha, ip);
+    if (!validCaptcha) return errorMessage('اختبار التحقق فشل. حاول مرة ثانية.', 400, origin);
+  } else if (!ip) {
+    return errorMessage('تعذّر التحقق من الشبكة. حاول لاحقًا.', 503, origin);
+  }
 
   let ipDigest: string | null = null;
-  if (IP_HASH_SECRET && ip) {
-    const today = new Date().toISOString().slice(0, 10);
-    ipDigest = await sha256(`${IP_HASH_SECRET}:${today}:${ip}`);
-  }
+  if (IP_HASH_SECRET && ip) ipDigest = await sha256(`${IP_HASH_SECRET}:lockin-giveaway:${ip}`);
 
   const ticket = randomTicket();
   const receiptDigest = await sha256(ticket);
@@ -141,7 +140,8 @@ async function register(body: any, req: Request, origin: string) {
   if (error?.code === '23505') return errorMessage('هذا الكود مستخدم. جرّب كود ثاني.', 409, origin);
   if (error) {
     if (error.message.includes('REGISTRATION_CLOSED')) return errorMessage('التسجيل مغلق.', 409, origin);
-    if (error.message.includes('IP_RATE_LIMIT')) return errorMessage('تم بلوغ حد المشاركات من هذه الشبكة اليوم.', 429, origin);
+    if (error.message.includes('IP_RATE_LIMIT')) return errorMessage('تم بلوغ حد المشاركات من هذه الشبكة في المسابقة.', 429, origin);
+    if (error.message.includes('IP_WAIT')) return errorMessage('انتظر قليلًا قبل تسجيل مشاركة جديدة.', 429, origin);
     throw error;
   }
   return json({ ok: true, name: name.trim().replace(/\s+/g, ' '), code, ticket }, 201, origin);
