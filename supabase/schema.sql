@@ -147,8 +147,11 @@ begin
   if p_ip_digest is not null then
     select count(*) into v_count from public.contest_entries
     where ip_digest = p_ip_digest;
-    if v_count >= 30 then
+    if v_count >= 5 then
       raise exception 'IP_RATE_LIMIT';
+    end if;
+    if exists (select 1 from public.contest_entries where ip_digest = p_ip_digest and created_at > now() - interval '20 seconds') then
+      raise exception 'IP_WAIT';
     end if;
   end if;
   insert into public.contest_entries(display_name, chosen_code, receipt_digest, ip_digest)
