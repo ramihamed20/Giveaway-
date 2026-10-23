@@ -1,4 +1,45 @@
-# مسابقة Lock-in 🎟️
+# Lock-in Giveaway — Live setup
+
+**Public site:** https://ramihamed20.github.io/Giveaway-/
+
+**Admin login:** https://ramihamed20.github.io/Giveaway-/?admin=1
+
+**Dedicated Supabase project:** https://supabase.com/dashboard/project/ciiapzkhkvhdvbuaynar
+
+The static site is deployed by GitHub Actions on every push to `main`. The Supabase database, 6 prize slots, and `contest-api` Edge Function are installed and tested. A test registration was made then deleted.
+
+## Admin setup (one-time, not yet provisioned)
+
+1. Open the Supabase project → **Authentication** → **Users** → **Add user**.
+2. Create a user with an **email address you own** and a strong password. Confirm the email from the dashboard if prompted.
+3. Copy the generated **User UID**. In SQL Editor execute:
+
+```sql
+insert into public.contest_admins(user_id)
+values ('REPLACE-WITH-REAL-USER-UID')
+on conflict do nothing;
+```
+
+4. Log in using the email and password at the **Admin login** link above.
+
+**Do not place admin credentials, service_role keys, or private secrets on GitHub.** A Supabase Auth account does not become an admin until its UUID is allowlisted in `contest_admins`.
+
+## Anti-abuse and CAPTCHA
+
+Anonymous entries are allowed with name + unique five-digit code. Server-side throttling currently allows up to 5 entries from the same hashed network address over the entire contest, with a 20-second cooldown between entries. This protects against casual spam, **not** determined abuse. Codes are unique, but these measures do not prove each person submits only once. Before public promotion, consider setting up [Cloudflare Turnstile](https://dash.cloudflare.com/turnstile), populating `TURNSTILE_SECRET` in Edge Function Secrets and `TURNSTILE_SITE_KEY` in `config.js`. When configured, the CAPTCHA becomes mandatory.
+
+Registration receipts (LK-...) must be kept confidential. Winners are displayed with one hidden code digit. Admins verify the missing digit and receipt before marking a prize as delivered.
+
+## Other points
+
+- The original Baddel Supabase project was **paused, not deleted**; PlusCard was left unchanged.
+- This giveaway database is separate from the Lock-in learning platform.
+- Winning does **not** automatically issue a real paid-plan entitlement; prizes must be fulfilled manually.
+- GitHub Pages deployment workflow: `.github/workflows/deploy-pages.yml`.
+
+---
+
+# Original implementation notes
 
 موقع عربي متجاوب جاهز للنشر على **GitHub Pages**، وخلفيته **Supabase Postgres + Edge Function**. مخصص لمسابقة مستقلة عن قاعدة بيانات Lock-in الأساسية.
 
