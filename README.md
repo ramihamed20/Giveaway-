@@ -23,7 +23,7 @@
 
 ## 1 — أنشئ مشروع Supabase مستقل
 
-لا تستخدم مشروعاتك الأخرى، ولا بيانات أو اشتراكات الطلاب. من https://supabase.com/dashboard أنشئ مشروعًا جديدًا مثل `lockin-giveaway`.
+لا تستخدم مشروعاتك الأخرى، ولا بيانات أو اشتراكات الطلاب. من https://supabase.com/dashboard أنشئ مشروعًا جديدًا مثل `Giveaway-`.
 
 من **SQL Editor** افتح الملف:
 
@@ -49,8 +49,8 @@ npx supabase login
 npx supabase link --project-ref YOUR_SUPABASE_PROJECT_REF
 npx supabase secrets set TURNSTILE_SECRET="YOUR_TURNSTILE_SECRET"
 npx supabase secrets set IP_HASH_SECRET="PUT_A_LONG_RANDOM_PRIVATE_STRING_HERE"
-npx supabase secrets set ALLOWED_ORIGIN="https://YOUR-USER.github.io"
-npx supabase secrets set TURNSTILE_HOSTNAME="YOUR-USER.github.io"
+npx supabase secrets set ALLOWED_ORIGIN="https://ramihamed20.github.io"
+npx supabase secrets set TURNSTILE_HOSTNAME="ramihamed20.github.io"
 npx supabase functions deploy contest-api --no-verify-jwt
 ```
 
@@ -74,7 +74,7 @@ on conflict do nothing;
 
 الحساب الإداري المسموح له محدد بواسطة **معرّف المستخدم** في الجدول، وليس فقط معرفة كلمة مرور عشوائية أو وجود حساب Supabase. من الأفضل إيقاف التسجيل العام لحسابات Supabase Auth؛ التسجيل في المسابقة لا يحتاج إلى Supabase Auth.
 
-## 5 — اربط واجهة الموقع وانشرها على GitHub
+## 5 — اربط واجهة الموقع وفعّل GitHub Pages
 
 من **Supabase Dashboard → Project Settings / API** أو **Connect** احصل على:
 
@@ -93,17 +93,17 @@ window.LOCKIN_GIVEAWAY_CONFIG = {
 
 المفاتيح الثلاثة أعلاه **عامة** ويجوز نشرها. السر `TURNSTILE_SECRET` و`SUPABASE_SERVICE_ROLE_KEY` و`IP_HASH_SECRET` لا توضع هنا.
 
-أنشئ مستودعًا عامًا باسم `lockin-giveaway` على GitHub، وارفع الملفات والمجلدات الموجودة **داخل** هذا المشروع إلى جذر المستودع (يجب أن يكون `index.html` في الجذر).
+تم رفع الملفات إلى المستودع [ramihamed20/Giveaway-](https://github.com/ramihamed20/Giveaway-) في الفرع `main`، وملف `index.html` موجود في الجذر.
 
-ثم: **Settings → Pages → Build and deployment → Deploy from a branch → main → /(root) → Save**.
+ثم: **Settings → Pages → Build and deployment → Deploy from a branch → main → /(root) → Save**. قبل هذا الإعداد، الكود موجود في GitHub لكنه ليس موقعًا منشورًا بعد.
 
 عنوان الموقع سيكون غالبًا:
 
-`https://YOUR-USER.github.io/lockin-giveaway/`
+`https://ramihamed20.github.io/Giveaway-/`
 
 لوحة الإدارة:
 
-`https://YOUR-USER.github.io/lockin-giveaway/?admin=1`
+`https://ramihamed20.github.io/Giveaway-/?admin=1`
 
 يمكن استخدام نطاق خاص مستقل لاحقًا أو رابط من داخل Lock-in، بدون دمج قواعد البيانات.
 
